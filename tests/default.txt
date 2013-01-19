@@ -2,7 +2,6 @@ acl
 aliases
 basic_permissions
 bsd_flags
-bsd_flags_details
 ea+resource_forks
 extended_attributes
 file_attributes
