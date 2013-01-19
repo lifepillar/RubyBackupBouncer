@@ -1,0 +1,12 @@
+.rbenv-version
+.DS_Store
+bin/*
+!bin/xattr-util
+!bin/README-xattr-util.txt
+copiers/enabled.txt
+doc/
+folders/
+tests/enabled.txt
+tmp/
+vendor/bundle/
+volumes/

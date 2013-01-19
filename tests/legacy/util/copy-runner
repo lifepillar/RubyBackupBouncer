@@ -1,0 +1,22 @@
+#!/bin/bash
+
+copier=$1
+src=$2
+dst=$3
+
+source $copier
+
+if can-copy; then
+    uname -a > $dst/meta
+    echo >> $dst/meta
+    echo $copier >> $dst/meta
+    echo >> $dst/meta
+    version >> $dst/meta
+    
+    backup $src $dst &> $dst/log
+    #backup $src $dst | tee $dst/log
+    exit $?
+else
+    echo "Skipping: can't find needed files"
+    touch $dst/skipped
+fi

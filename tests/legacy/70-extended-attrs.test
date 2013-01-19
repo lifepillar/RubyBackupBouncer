@@ -1,0 +1,106 @@
+#!/bin/sh
+#
+# There are no tools included with OS X to manipulate extended attributes from
+# the command line, so I wrote my own.
+
+max_priority () {
+    echo $Important
+}
+
+create () {
+    cd $1
+    set -e
+    
+    touch xattr-test
+    xattr --set message 'hello world' xattr-test
+    xattr --set this.that 'the other' xattr-test
+    
+    touch xattr-test-locked-file
+    xattr --set message 'hello world' xattr-test-locked-file
+    xattr --set this.that 'the other' xattr-test-locked-file
+    chflags uchg xattr-test-locked-file
+    
+    mkdir dir-with-xattrs
+    xattr --set mamma.mia 'How about a nice pizza pie?' dir-with-xattrs
+    
+    ln -s ./xattr-test symlink-with-xattrs
+    xattr --set good.grief 'yes, you can put these on symlinks too' \
+            symlink-with-xattrs
+    
+}
+
+compare () {
+    test -e $1 && \
+        test -e $2 && \
+        test "`xattr --list $1`" = "`xattr --list $2`" \
+        || return 1
+    for a in `xattr --list $1`; do
+        test "`xattr --get $a $1`" = "`xattr --get $a $2`" || return 1
+    done
+}
+
+compare-mtime () {
+    test "`stat -f '%m' $1`" = "`stat -f '%m' $2`"
+}
+
+compare-ctime () {
+    test "`GetFileInfo -d $1`" = "`GetFileInfo -d $2`"
+}
+
+verify () {
+    cd $1
+    set +e
+    
+    begin-subtests
+    
+    compare ./xattr-test $2/xattr-test
+    x1=$?
+    subtest "[ on files ]" $x1
+    compare-ctime ./xattr-test $2/xattr-test
+    x1a=$?
+    subtest "    creation time" $x1a
+    compare-mtime ./xattr-test $2/xattr-test
+    x1b=$?
+    subtest "    modification time" $x1b
+    
+
+    compare ./xattr-test-locked-file $2/xattr-test-locked-file
+    x2=$?
+    subtest "[ on locked files ]" $x2
+    compare-ctime ./xattr-test-locked-file $2/xattr-test-locked-file
+    x2a=$?
+    subtest "    creation time" $x2a
+    compare-mtime ./xattr-test-locked-file $2/xattr-test-locked-file
+    x2b=$?
+    subtest "    modification time" $x2b
+    
+
+    compare ./dir-with-xattrs $2/dir-with-xattrs
+    x3=$?
+    subtest "[ on directories ]" $x3
+    compare-ctime ./dir-with-xattrs $2/dir-with-xattrs
+    x3a=$?
+    subtest "    creation time" $x3a
+    compare-mtime ./dir-with-xattrs $2/dir-with-xattrs
+    x3b=$?
+    subtest "    modification time" $x3b
+    
+
+    test_priority=$Exhaustive
+    compare ./symlink-with-xattrs $2/symlink-with-xattrs
+    x4=$?
+    subtest "[ on symlinks ]" $x4
+    compare-ctime ./symlink-with-xattrs $2/symlink-with-xattrs
+    x4a=$?
+    subtest "    creation time" $x4a
+#    compare-mtime ./symlink-with-xattrs $2/symlink-with-xattrs
+#    x4b=$?
+#    subtest "    modification time" $x4b
+
+        
+    alltrue $x1 $x2 $x3 $x4 $x1a $x2a $x3a $x4a $x1b $x2b $x3b
+}
+
+clean () {
+    true
+}

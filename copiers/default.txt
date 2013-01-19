@@ -1,0 +1,8 @@
+asr
+cp
+dd
+ditto
+Finder
+pax
+tar
+xar

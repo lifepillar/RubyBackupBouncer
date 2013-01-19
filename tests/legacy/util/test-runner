@@ -1,0 +1,50 @@
+#!/bin/bash
+
+export PATH="`pwd`/tests/legacy/util:/Developer/Tools:$PATH:."
+export DETAIL=1
+export printWidth=0
+
+has_subtests=""
+
+begin-subtests () {
+	printf "  %s" "$testname"
+	echo
+}
+
+subtest () {
+	has_subtests="1"
+	printf "     Sub-test: %s ... " "$1"
+	if [ "$2" = "0" ]; then
+		echo "PASS"
+	else
+		echo "FAIL"
+	fi
+}
+
+alltrue () {
+    while [ -n "$1" ]; do
+        [ "$1" = "0" ] || return 1
+        shift
+    done
+    return 0
+}
+
+source $1
+shift
+case $1 in
+	create)
+		create $2
+		exit 0
+	;;
+	compare|verify)
+		testname=`basename $2`
+		verify $3 $2
+		if [ $? = "0" ]; then
+			exit 0
+		else
+			exit 1
+		fi
+	;;
+esac
+# Something wrong
+exit 2
