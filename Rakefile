@@ -642,7 +642,7 @@ Example:
     rake mount dev=disk5s1 rw=no
 EOS
 task :mount, [:dev,:rw] do |t,args|
-  args.with_defaults(:dev => ENV['dev'])
+  args.with_defaults(:dev => ENV['dev'] || DEFAULT_VOLUME_NAME)
   args.with_defaults(:rw => ENV['rw'] || 'yes')
   read_only = (args.rw =~ /y/) ? false : true
   if args.dev.start_with?('/dev/')
