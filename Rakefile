@@ -69,6 +69,17 @@ def devices
   disk_images.select { |d| d.attached? }.map { |d| d.device } + ram_disks
 end
 
+# Tries to find a device with a given name.
+# Returns the device entry if found, nil otherwise.
+def device_by_name name
+  devices.each do |device|
+    if name == device.volume.name
+      return Pathname.new(device.volume.dev_node)
+    end
+  end
+  return nil
+end
+
 # Creates and mounts a single volume disk image or ram disk.
 #
 # The created volume has ownership enabled by default.
@@ -648,13 +659,7 @@ task :mount, [:dev,:rw] do |t,args|
   if args.dev.start_with?('/dev/')
     p = Pathname.new(args.dev)
   else
-    p = nil
-    devices.each do |device| # Search by name
-      if args.dev == device.volume.name
-        p = Pathname.new(device.volume.dev_node)
-        break
-      end
-    end
+    p = device_by_name(args.dev)
     p = Pathname.new('/dev') + args.dev if p.nil?
   end
   abort "#{p} is not a valid device entry." unless p.exist?
