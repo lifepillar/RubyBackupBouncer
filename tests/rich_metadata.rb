@@ -75,7 +75,7 @@ class RichMetadata < Rbb::TestCase
   
   def test_permissions
     verify_property all_files do |source,target,name|
-      assert_equal source.permissions, target.permissions,
+      assert_equal source.permissions, target.permissions, name
     end
   end
 
