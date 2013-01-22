@@ -200,17 +200,23 @@ Example:
     rake clone[MyDisk]
 EOS
 task :clone, [:vol] do |t,args|
-  args.with_defaults(:vol => ENV['vol'] || '/Volumes/'+DEFAULT_VOLUME_NAME)
+  args.with_defaults(:vol => ENV['vol'] || DEFAULT_VOLUME_NAME)
   if args.vol.start_with?('/Volumes/')
-    p = Pathname.new(args.vol)
+    name = Pathname.new(args.vol).basename.to_s
   else
-    p = Pathname.new('/Volumes') + args.vol
+    name = args.vol
   end
-  abort "#{p} does not exist." unless p.exist?
-  $source = Rbb::Volume.new(p)
-  # Re-mount the source volume in read-only mode to prevent modification.
+  # Re-attach the source disk in read-only mode to prevent modification.
   # Make sure that ownership in enabled.
-  $source.remount(:force_readonly => true) if $source.writable?
+  device = device_by_name(name)
+  abort "Cannot find the device entry for #{$source}." if device.nil?
+  abort "The source device cannot be a ram disk." if device.ram?
+  image_path = Pathname.new(device.image_path)
+  abort "#{image_path} does not exist." unless image_path.exist?
+  source_disk = Rbb::DiskImage.new(image_path)
+  puts "Re-attaching #{image_path.basename} in read-only mode."
+  source_disk.reattach(:readonly => true)
+  $source = source_disk.device.volume
   unless $source.ownership_enabled?
     puts 'Re-enabling ownership (password may be required)...'
     $source.enable_ownership
