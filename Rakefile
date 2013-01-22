@@ -248,14 +248,14 @@ task :compare, [:src,:dst,:ctime,:inode] do |t,args|
   abort "#{target} does not exist." unless target.exist?
   ctime = (args.ctime =~ /y/) ? true : false
   inode = (args.inode =~ /y/) ? true : false
-	
+  
   require 'ansi/progressbar'
   source_files = Pathname.glob(source + '**' + '**')
-	pbar = ::ANSI::Progressbar.new('Testing', source_files.size)
+  pbar = ::ANSI::Progressbar.new('Testing', source_files.size)
 
   report = []
   source_files.each do |a|
-		pbar.inc
+    pbar.inc
     b = target + a.relative_path_from(source)
     unless b.exist? or b.symlink?
       report << "#{a.relative_path_from(source)}: not copied"
