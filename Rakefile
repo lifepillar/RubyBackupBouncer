@@ -74,7 +74,7 @@ end
 def device_by_name name
   devices.each do |device|
     if name == device.volume.name
-      return Pathname.new(device.volume.dev_node)
+      return device
     end
   end
   return nil
@@ -659,8 +659,12 @@ task :mount, [:dev,:rw] do |t,args|
   if args.dev.start_with?('/dev/')
     p = Pathname.new(args.dev)
   else
-    p = device_by_name(args.dev)
-    p = Pathname.new('/dev') + args.dev if p.nil?
+    device = device_by_name(args.dev)
+    if device.nil?
+      p = Pathname.new('/dev') + args.dev
+    else
+      p = Pathname.new(device.volume.dev_node)
+    end
   end
   abort "#{p} is not a valid device entry." unless p.exist?
   Rbb::Volume.new(p).mount(:force_readonly => read_only)
