@@ -230,6 +230,7 @@ task :compare, [:src,:dst,:ctime,:inode] do |t,args|
   args.with_defaults(:dst => ENV['dst'])
   args.with_defaults(:ctime => ENV['ctime'] || 'no')
   args.with_defaults(:ctime => ENV['inode'] || 'no')
+  abort "Please specify a destination." if args.dst.nil?
   source = Pathname.new(args.src).expand_path
   target = Pathname.new(args.dst).expand_path
   abort "#{source} does not exist." unless source.exist?
