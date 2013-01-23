@@ -18,11 +18,9 @@ task :clone do
     if copier =~ /unison/
       target = make_volume 'unison', :ram => true
       puts '===> [clone] unison'
-      # Remount in read-write mode: Unison does not like if a volume is read-only
-      rw = $source.writable?
-      $source.remount unless rw
+
       args = []
-      args << '-force' << 'newer' << '-group' << '-ignorearchives' << '-owner'
+      args << '-force' << $source.mount_point << '-group' << '-ignorearchives' << '-owner'
       args << '-perms' << '-1' << '-times' << '-silent' << '-terse'
       args << '-log' << '-logfile' << DIR_TMP + 'unison.log'
       args << $source.mount_point << target.mount_point
@@ -31,7 +29,6 @@ task :clone do
       rescue => ex
         puts "unison clone task has failed: #{ex}"
       end
-      $source.remount(:force_readonly => true) unless rw
     else
       puts '-' * 70
       puts 'NOTE: unison is not installed. You may install unison using'
@@ -70,3 +67,4 @@ task :copy do
     puts '-' * 70
   end
 end
+
