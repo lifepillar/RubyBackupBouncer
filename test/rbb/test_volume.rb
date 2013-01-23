@@ -41,4 +41,11 @@ class TestVolume < MiniTest::Unit::TestCase
     refute @vol.ownership_enabled?, 'Ownership should be disabled'
   end
 
+  def test_parent_whole_disk
+    device = @vol.parent_whole_disk
+    refute_nil device
+    assert_instance_of Rbb::Device, device
+    assert @vol.dev_node.start_with?(device.dev_node)
+  end
+
 end # TestVolume

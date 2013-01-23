@@ -122,5 +122,10 @@ module Rbb
       self['WritableVolume']
     end
 
+    # Returns the device containing this volume.
+    def parent_whole_disk
+      Device.new('/dev/' + self['ParentWholeDisk'])
+    end
+
   end # class Volume
 end # module Rbb
