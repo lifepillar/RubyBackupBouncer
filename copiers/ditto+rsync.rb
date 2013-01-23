@@ -25,14 +25,23 @@ task :clone do
     rsync_args << "--rsync-path=#{rsync}" << '--quiet'
     rsync_args << $source.mount_point.to_s + '/' << target.mount_point
     begin
-      run_baby_run ditto, ditto_args, :sudo => true, :verbose => false
+      run_baby_run ditto, ditto_args, :sudo => true, :verbose => false,
+        :redirect_stderr_to_stdout => true
+    rescue
+      puts 'ditto has exited with errors, but rsync may fix them.'
+    end
+    begin
       # Unlocking files should not be needed, given --force-change,
       # but rsync 3.0.7 produces errors if the following is omitted
       run_baby_run 'chflags', ['-R', 'nouchg,noschg,nosappend', target.mount_point],
         :sudo => true, :verbose => false
+    rescue
+      puts 'Could not unlock files.'
+    end
+    begin
       run_baby_run rsync, rsync_args, :sudo => true, :verbose => false
-    rescue => ex
-      puts "ditto+rsync clone task has failed: #{ex}"
+    rescue
+      puts 'rsync has exited with errors. Some files may not have been copied correctly.'
     end
   rescue Rbb::DiskImageExists
     puts 'Skipping ditto+rsync clone task (volume exists).'
@@ -56,14 +65,23 @@ task :copy do
     rsync_args << "--rsync-path=#{rsync}" << '--quiet'
     rsync_args << $source.to_s + '/' << target
     begin
-      run_baby_run ditto, ditto_args, :sudo => true, :verbose => false
+      run_baby_run ditto, ditto_args, :sudo => true, :verbose => false,
+        :redirect_stderr_to_stdout => true
+    rescue
+      puts 'ditto has exited with errors, but rsync may fix them.'
+    end
+    begin
       # Unlocking files should not be needed, given --force-change,
       # but rsync 3.0.7 produces errors if the following is omitted
       run_baby_run 'chflags', ['-R', 'nouchg,noschg,nosappend', target],
         :sudo => true, :verbose => false
+    rescue
+      puts 'Could not unlock files.'
+    end
+    begin
       run_baby_run rsync, rsync_args, :sudo => true, :verbose => false
-    rescue => ex
-      puts "ditto+rsync copy task has failed: #{ex}"
+    rescue
+      puts 'rsync has exited with errors. Some files may not have been copied correctly.'
     end
   end
 end
