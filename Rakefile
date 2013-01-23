@@ -98,6 +98,27 @@ def make_volume name, options = {}
  return volume
 end
 
+# Reattaches the parent disk of the given volume.
+# Returns the reattached device, aborts the task if an error occurs.
+#
+# Options: readonly
+def reattach_parent_disk_of_volume volume, options = {}
+  opts = { :readonly => false }.merge!(options)
+  begin
+    device = Rbb::Volume.new(volume).parent_whole_disk
+  rescue
+    abort "Cannot find the disk information for #{volume}."
+  end
+  abort "The source device cannot be a ram disk." if device.ram?
+  image_path = Pathname.new(device.image_path)
+  abort "#{image_path} does not exist." unless image_path.exist?
+  source_disk = Rbb::DiskImage.new(image_path)
+  print "Re-attaching #{image_path.basename} "
+  puts opts[:readonly] ? 'in read-only mode.' : 'in read-write mode.'
+  source_disk.reattach(opts)
+  return source_disk.device
+end
+
 def abort_if_bsd_system_flags_enabled
   if $enabled_tests.include?('bsd_system_flags')
     abort "The bsd_system_flags test case must be disabled to run this task:\n\n" +
@@ -209,18 +230,8 @@ task :clone, [:vol] do |t,args|
   abort "#{p} does not exist." unless p.exist?
   # Re-attach the source disk in read-only mode to prevent modification.
   # Make sure that ownership in enabled.
-  begin
-    device = Rbb::Volume.new(p).parent_whole_disk
-  rescue
-    abort "Cannot find the disk information for #{p}."
-  end
-  abort "The source device cannot be a ram disk." if device.ram?
-  image_path = Pathname.new(device.image_path)
-  abort "#{image_path} does not exist." unless image_path.exist?
-  source_disk = Rbb::DiskImage.new(image_path)
-  puts "Re-attaching #{image_path.basename} in read-only mode."
-  source_disk.reattach(:readonly => true)
-  $source = source_disk.device.volume
+  device = reattach_parent_disk_of_volume(p, :readonly => true)
+  $source = device.volume
   unless $source.ownership_enabled?
     puts 'Re-enabling ownership (password may be required)...'
     $source.enable_ownership
@@ -347,18 +358,8 @@ task :copy, [:src,:dst] do |t,args|
   if $source.to_s.start_with?('/Volumes')
     # Re-attach the source disk in read-only mode to prevent modification.
     # Make sure that ownership in enabled.
-    begin
-      device = Rbb::Volume.new($source).parent_whole_disk
-    rescue
-      abort "Cannot find the disk information for #{$source}."
-    end
-    abort "The source device cannot be a ram disk." if device.ram?
-    image_path = Pathname.new(device.image_path)
-    abort "#{image_path} does not exist." unless image_path.exist?
-    source_disk = Rbb::DiskImage.new(image_path)
-    puts "Re-attaching #{image_path.basename} in read-only mode."
-    source_disk.reattach(:readonly => true)
-    volume = source_disk.device.volume
+    device = reattach_parent_disk_of_volume($source, :readonly => true)
+    volume = device.volume
     unless volume.ownership_enabled?
       puts 'Re-enabling ownership (password may be required)...'
       volume.enable_ownership
