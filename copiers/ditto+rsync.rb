@@ -5,7 +5,6 @@ the data with Homebrew's rsync (/usr/local/bin/rsync)
 These are the commands performed by this task:
 
   sudo /usr/bin/ditto <source> <target>
-  sudo chflags -R nouchg,noschg,nosappend <target>
   sudo /usr/local/bin/rsync -aNHAX --itemize-changes --super
     --protect-args --fileflags --force-change <source>/ <target>
 =end
@@ -31,13 +30,6 @@ task :clone do
       puts 'ditto has exited with errors, but rsync may fix them.'
     end
     begin
-      # Unlocking files should not be needed, given --force-change,
-      # but rsync 3.0.7 produces errors if the following is omitted
-      run_baby_run 'chflags', ['-R', 'nouchg,noschg,nosappend', target.mount_point],
-        :sudo => true, :verbose => false
-    rescue
-      puts 'Could not unlock files.'
-    end
     begin
       run_baby_run rsync, rsync_args, :sudo => true, :verbose => false
     rescue
@@ -71,13 +63,6 @@ task :copy do
       puts 'ditto has exited with errors, but rsync may fix them.'
     end
     begin
-      # Unlocking files should not be needed, given --force-change,
-      # but rsync 3.0.7 produces errors if the following is omitted
-      run_baby_run 'chflags', ['-R', 'nouchg,noschg,nosappend', target],
-        :sudo => true, :verbose => false
-    rescue
-      puts 'Could not unlock files.'
-    end
     begin
       run_baby_run rsync, rsync_args, :sudo => true, :verbose => false
     rescue
