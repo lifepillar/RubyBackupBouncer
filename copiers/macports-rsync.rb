@@ -19,9 +19,10 @@ task :clone do
     args << "--rsync-path=#{copier}" << '--quiet'
     args << $source.mount_point.to_s + '/' << target.mount_point
     begin
-      run_baby_run copier, args, :sudo => true, :verbose => false
+      run_baby_run copier, args, :sudo => true, :verbose => false,
+        :redirect_stderr_to_stdout => true
     rescue => ex
-      puts "macports-rsync clone task has exited with errors."
+      puts "macports-rsync has exited with errors. Some files may not have been copied."
     end
   rescue Rbb::DiskImageExists
     puts 'Skipping macports-rsync clone task (volume exists).'
@@ -43,9 +44,10 @@ task :copy do
     args << "--rsync-path=#{copier}" << '--quiet'
     args << $source.to_s + '/' << target
     begin
-      run_baby_run copier, args, :sudo => true, :verbose => false
+      run_baby_run copier, args, :sudo => true, :verbose => false,
+        :redirect_stderr_to_stdout => true
     rescue => ex
-      puts "macports-rsync clone task has failed: #{ex}"
+      puts "macports-rsync has exited with errors. Some files may not have been copied."
     end
   end
 end

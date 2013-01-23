@@ -16,9 +16,10 @@ task :clone do
     args << "--rsync-path=#{copier}" << '--quiet'
     args << $source.mount_point.to_s + '/' << target.mount_point
     begin
-      run_baby_run copier, args, :sudo => true, :verbose => false
-    rescue => ex
-      puts "homebrew-rsync clone task has exited with errors"
+      run_baby_run copier, args, :sudo => true, :verbose => false,
+        :redirect_stderr_to_stdout => true
+    rescue
+      puts "homebrew-rsync has exited with errors. Some files may not have been copied."
     end
   rescue Rbb::DiskImageExists
     puts 'Skipping homebrew-rsync clone task (volume exists).'
@@ -40,9 +41,10 @@ task :copy do
     args << "--rsync-path=#{copier}" << '--quiet'
     args << $source.to_s + '/' << target
     begin
-      run_baby_run copier, args, :sudo => true, :verbose => false
-    rescue => ex
-      puts "homebrew-rsync clone task has failed: #{ex}"
+      run_baby_run copier, args, :sudo => true, :verbose => false,
+        :redirect_stderr_to_stdout => true
+    rescue
+      puts "homebrew-rsync has exited with errors. Some files may not have been copied."
     end
   end
 end
