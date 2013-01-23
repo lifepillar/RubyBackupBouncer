@@ -30,8 +30,8 @@ task :clone do
       puts 'ditto has exited with errors, but rsync may fix them.'
     end
     begin
-    begin
-      run_baby_run rsync, rsync_args, :sudo => true, :verbose => false
+      run_baby_run rsync, rsync_args, :sudo => true, :verbose => false,
+        :redirect_stderr_to_stdout => true
     rescue
       puts 'rsync has exited with errors. Some files may not have been copied correctly.'
     end
@@ -63,8 +63,8 @@ task :copy do
       puts 'ditto has exited with errors, but rsync may fix them.'
     end
     begin
-    begin
-      run_baby_run rsync, rsync_args, :sudo => true, :verbose => false
+      run_baby_run rsync, rsync_args, :sudo => true, :verbose => false,
+        :redirect_stderr_to_stdout => true
     rescue
       puts 'rsync has exited with errors. Some files may not have been copied correctly.'
     end
