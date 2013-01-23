@@ -202,14 +202,18 @@ EOS
 task :clone, [:vol] do |t,args|
   args.with_defaults(:vol => ENV['vol'] || DEFAULT_VOLUME_NAME)
   if args.vol.start_with?('/Volumes/')
-    name = Pathname.new(args.vol).basename.to_s
+    p = Pathname.new(args.vol)
   else
-    name = args.vol
+    p = Pathname.new('/Volumes') + args.vol
   end
+  abort "#{p} does not exist." unless p.exist?
   # Re-attach the source disk in read-only mode to prevent modification.
   # Make sure that ownership in enabled.
-  device = device_by_name(name)
-  abort "Cannot find the device entry for #{args.vol}." if device.nil?
+  begin
+    device = Rbb::Volume.new(p).parent_whole_disk
+  rescue
+    abort "Cannot find the disk information for #{p}."
+  end
   abort "The source device cannot be a ram disk." if device.ram?
   image_path = Pathname.new(device.image_path)
   abort "#{image_path} does not exist." unless image_path.exist?
