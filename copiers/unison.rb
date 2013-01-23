@@ -50,7 +50,7 @@ task :copy do
       puts '===> [copy] unison'
       target.mkpath
       args = []
-      args << '-force' << 'newer' << '-group' << '-ignorearchives' << '-owner'
+      args << '-force' << $source << '-group' << '-ignorearchives' << '-owner'
       args << '-perms' << '-1' << '-times' << '-silent' << '-terse'
       args << '-log' << '-logfile' << DIR_TMP + 'unison.log'
       args << $source << target
