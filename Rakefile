@@ -815,30 +815,25 @@ task :unmount, [:vol] do |t,args|
 end
 
 desc <<-EOS
-Compare source with target using the given test and format.
+Compare source with target.
 
 Arguments:
 
   src:    source path (default: /Volumes/#{DEFAULT_VOLUME_NAME})
   dst:    path to a copy of the source
-  test:   name of a test case (default: *)
   format: output format (default: pretty)
 
-  The test argument may be a glob pattern. The default is
-  to run all the enabled test cases. The values for
-  the output format are the same as for the Turn gem:
+  The values for the output format are the same as for the Turn gem:
   pretty, dot, cue, marshal, outline, progress.
 
 Examples:
 
   rake verify dst=/Volumes/ditto
-  rake verify dst=/Volumes/ditto test=*forks
   rake verify src=~/Desktop/MyDir dst=~/Desktop/MyDirCopy format=progress
 EOS
-task :verify, [:src,:dst,:test,:format] do |t,args|
+task :verify, [:src,:dst,:format] do |t,args|
   args.with_defaults(:src => ENV['src'] || '/Volumes/' + DEFAULT_VOLUME_NAME)
   args.with_defaults(:dst => ENV['dst'])
-  args.with_defaults(:test => ENV['test'] || '*')
   args.with_defaults(:format => ENV['format'] || 'pretty')
   $source = Pathname.new(args.src).expand_path
   $target = Pathname.new(args.dst).expand_path
@@ -873,7 +868,6 @@ task :verify, [:src,:dst,:test,:format] do |t,args|
     abort "The turn gem was not found. You may need to run 'bundle install'."
   end
   Turn.config.format = args.format.to_sym
-  Turn.config.tests = Pathname.glob("tests/#{args.test}.rb") & $enabled_tests.map { |t| Pathname.new('tests')+(t+'.rb') }
   Turn.config.trace = 3
   Turn.config.natural = true
   MiniTest::Unit.runner.run
