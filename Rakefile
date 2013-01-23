@@ -344,15 +344,26 @@ task :copy, [:src,:dst] do |t,args|
   $target = Pathname.new(args.dst).expand_path
   abort "#{$source} does not exist." unless $source.exist?
   abort "#{$target} does not exist." unless $target.exist?
-  if $source.to_s.start_with?('/Volumes') # Re-mount in read-only mode if necessary
-    volume = Rbb::Volume.new($source)
-    # Re-mount the source volume in read-only mode to prevent modification.
+  if $source.to_s.start_with?('/Volumes')
+    # Re-attach the source disk in read-only mode to prevent modification.
     # Make sure that ownership in enabled.
-    volume.remount(:force_readonly => true) if volume.writable?
+    begin
+      device = Rbb::Volume.new($source).parent_whole_disk
+    rescue
+      abort "Cannot find the disk information for #{$source}."
+    end
+    abort "The source device cannot be a ram disk." if device.ram?
+    image_path = Pathname.new(device.image_path)
+    abort "#{image_path} does not exist." unless image_path.exist?
+    source_disk = Rbb::DiskImage.new(image_path)
+    puts "Re-attaching #{image_path.basename} in read-only mode."
+    source_disk.reattach(:readonly => true)
+    volume = source_disk.device.volume
     unless volume.ownership_enabled?
       puts 'Re-enabling ownership (password may be required)...'
       volume.enable_ownership
     end
+    $source = volume.mount_point
   end
   # Load copiers
   $LOAD_PATH.unshift(DIR_COPIERS.to_s)
