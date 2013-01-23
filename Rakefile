@@ -815,7 +815,7 @@ task :unmount, [:vol] do |t,args|
 end
 
 desc <<-EOS
-Compare source with target.
+Compare source with target using the enabled tests.
 
 Arguments:
 
