@@ -583,6 +583,8 @@ task :fill, [:path] do |t,args|
   if $source.exist?
     volume = Rbb::Volume.new($source)
     volume.remount unless volume.writable? # Remount in read-write mode if necessary
+    # If the volume is not yet writable, we need to re-attach the disk.
+    volume = reattach_parent_disk_of_volume(volume.dev_node, :readonly => false).volume
   elsif $source.to_s =~ /#{DEFAULT_VOLUME_NAME}$/
     Rake::Task['mkvol'].invoke
   else # Assume directory
