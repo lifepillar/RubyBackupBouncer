@@ -13,8 +13,8 @@ task :clone do
     target = make_volume 'rsync', :ram => true
     puts '===> [clone] OS X rsync'
     puts '-' * 70
-    puts 'NOTE: OS X rsync may get stuck with some tests. If that seems'
-    puts 'to be the case, press ctrl-C to interrupt the process.'
+    puts 'NOTE: OS X rsync may freeze when the special_files test is enabled.'
+    puts 'To interrupt the process, press ctrl-C a couple of times.'
     puts '-' * 70
     copier = '/usr/bin/rsync'
     args = ['-aH']
@@ -23,8 +23,8 @@ task :clone do
     args << $source.mount_point.to_s + '/' << target.mount_point
     begin
       run_baby_run copier, args, :sudo => true, :verbose => false
-    rescue => ex
-      puts "rsync clone task has failed: #{ex}"
+    rescue
+      puts "rsync clone task has exited with errors. Some files may not have been copied."
     end
   rescue Rbb::DiskImageExists
     puts 'Skipping rsync clone task (volume exists).'
@@ -45,8 +45,8 @@ task :copy do
     args << $source.to_s + '/' << target
     begin
       run_baby_run copier, args, :sudo => true, :verbose => false
-    rescue => ex
-      puts "rsync clone task has failed: #{ex}"
+    rescue
+      puts "rsync copy task has exited with errors. Some files may not have been copied."
     end
   end
 end

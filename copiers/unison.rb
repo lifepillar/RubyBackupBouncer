@@ -26,8 +26,8 @@ task :clone do
       args << $source.mount_point << target.mount_point
       begin
         run_baby_run copier, args, :sudo => true, :verbose => false
-      rescue => ex
-        puts "unison clone task has failed: #{ex}"
+      rescue
+        puts "unison clone task has exited with errors: some files may not have been copied."
       end
     else
       puts '-' * 70
@@ -56,8 +56,8 @@ task :copy do
       args << $source << target
       begin
         run_baby_run copier, args, :sudo => true, :verbose => false
-      rescue => ex
-        puts "unison clone task has failed: #{ex}"
+      rescue
+        puts "unison clone task has exited with errors: some files may not have been copied."
       end
     end
   else

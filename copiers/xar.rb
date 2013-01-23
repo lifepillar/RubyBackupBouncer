@@ -18,8 +18,8 @@ task :clone do
       target.mount_point.cd do
         run_baby_run copier, ['-x', '-P', '-f', tmpfile], :sudo => true, :verbose => false
       end
-    rescue => ex
-      puts "xar clone task has failed: #{ex}"
+    rescue
+      puts "xar clone task has exited with errors. Some file may not have been copied."
     end
     rm_f tmpfile, :verbose => false
   rescue Rbb::DiskImageExists
@@ -44,8 +44,8 @@ task :copy do
       target.cd do
         run_baby_run copier, ['-x', '-P', '-f', tmpfile], :sudo => true, :verbose => false
       end
-    rescue => ex
-      puts "xar copy task has failed: #{ex}"
+    rescue
+      puts "xar clone task has exited with errors. Some file may not have been copied."
     end
     rm_f tmpfile, :verbose => false
   end

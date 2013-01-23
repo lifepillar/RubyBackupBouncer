@@ -5,9 +5,9 @@ modification dates on such files are preserved.
 =end
 
 task :fill do
-  topdir = $source + 'unix-special-files'
+  topdir = $source + 'special-files'
   if topdir.exist?
-    puts 'Skipping unix-special-files (folder exists).'
+    puts 'Skipping special-files (folder exists).'
   else
     puts '===> [fill] special-files'
     topdir.mkpath
@@ -21,7 +21,7 @@ task :fill do
       run_baby_run 'mknod', [topdir+'devvn0', 'b', '1', '0'], :sudo => true
       # Whiteout node?
     rescue => ex
-      puts "Populating unix-special-files has failed: #{ex}"
+      puts "Populating special-files has failed: #{ex}"
     end
   end
 end
@@ -33,7 +33,7 @@ end
 class UnixSpecialFiles < Rbb::TestCase
   
   def setup
-    set_wd 'unix-special-files'
+    set_wd 'special-files'
   end
 
   def test_filed_copied?
