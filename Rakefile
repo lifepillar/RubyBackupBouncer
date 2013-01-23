@@ -867,6 +867,7 @@ task :verify, [:src,:dst,:format] do |t,args|
   rescue LoadError
     abort "The turn gem was not found. You may need to run 'bundle install'."
   end
+  Turn.config.tests = Pathname.glob("tests/*.rb") & $enabled_tests.map { |t| Pathname.new('tests')+(t+'.rb') }
   Turn.config.format = args.format.to_sym
   Turn.config.trace = 3
   Turn.config.natural = true
