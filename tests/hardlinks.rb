@@ -82,4 +82,11 @@ class Hardlinks < Rbb::TestCase
     end
   end
 
+  def test_locked_files_are_still_locked
+    files = all_files.select { |f| f.file? and f.to_s =~ /uchg-hardlinks/ }
+    verify_property files do |source,target,name|
+      assert target.locked?, name
+    end
+  end
+
 end # Hardlinks
