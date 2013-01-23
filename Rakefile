@@ -209,7 +209,7 @@ task :clone, [:vol] do |t,args|
   # Re-attach the source disk in read-only mode to prevent modification.
   # Make sure that ownership in enabled.
   device = device_by_name(name)
-  abort "Cannot find the device entry for #{$source}." if device.nil?
+  abort "Cannot find the device entry for #{args.vol}." if device.nil?
   abort "The source device cannot be a ram disk." if device.ram?
   image_path = Pathname.new(device.image_path)
   abort "#{image_path} does not exist." unless image_path.exist?
